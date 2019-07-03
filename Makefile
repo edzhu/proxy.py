@@ -47,8 +47,13 @@ run-container:
 release-container:
 	docker push $(IMAGE_TAG)
 
+export ETH0_IP = $(shell ifconfig eth0 |grep netmask |awk '{print $$2}')
+export ETH1_IP = $(shell ifconfig eth1 |grep netmask |awk '{print $$2}')
+
 start-eth0:
-	nohup python3 proxy.py --host $(shell ifconfig eth0 |grep netmask |awk '{print $$2}') --port 3721 >/var/log/proxy-eth0.log 2>&1 &
+	kill $(shell cat /tmp/$(ETH0_IP).pid) || true
+	nohup python3 proxy.py --host $(ETH0_IP) --port 3721 >/var/log/proxy-eth0.log 2>&1 &
 
 start-eth1:
-	nohup python3 proxy.py --host $(shell ifconfig eth1 |grep netmask |awk '{print $$2}') --port 3721 >/var/log/proxy-eth1.log 2>&1 &
+	kill $(shell cat /tmp/$(ETH1_IP).pid) || true
+	nohup python3 proxy.py --host $(ETH1_IP) --port 3721 >/var/log/proxy-eth1.log 2>&1 &

@@ -384,16 +384,17 @@ class Connection(object):
 class Server(Connection):
     """Establish connection to destination server."""
 
-    def __init__(self, host, port):
+    def __init__(self, hostname, host, port):
         super(Server, self).__init__(b'server')
         self.addr = (host, int(port))
+        self.hostname = hostname
 
     def __del__(self):
         if self.conn:
             self.close()
 
     def connect(self):
-        self.conn = socket.create_connection((self.addr[0], self.addr[1]))
+        self.conn = socket.create_connection((self.addr[0], self.addr[1]), source_address=(self.hostname, 0))
 
 
 class Client(Connection):
@@ -430,11 +431,12 @@ class Proxy(threading.Thread):
     Accepts `Client` connection object and act as a proxy between client and server.
     """
 
-    def __init__(self, client, auth_code=None, server_recvbuf_size=8192, client_recvbuf_size=8192, pac_file = None):
+    def __init__(self, client, hostname, auth_code=None, server_recvbuf_size=8192, client_recvbuf_size=8192, pac_file = None):
         super(Proxy, self).__init__()
 
         self.start_time = self._now()
         self.last_activity = self.start_time
+        self.hostname = hostname
 
         self.auth_code = auth_code
         self.client = client
@@ -490,7 +492,7 @@ class Proxy(threading.Thread):
                 self._serve_pac_file()
                 return True
 
-            self.server = Server(host, port)
+            self.server = Server(self.hostname, host, port)
             try:
                 logger.debug('connecting to server %s:%s' % (host, port))
                 self.server.connect()
@@ -688,6 +690,7 @@ class HTTP(TCP):
 
     def handle(self, client):
         proxy = Proxy(client,
+                      hostname=self.hostname,
                       auth_code=self.auth_code,
                       server_recvbuf_size=self.server_recvbuf_size,
                       client_recvbuf_size=self.client_recvbuf_size,

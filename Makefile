@@ -48,7 +48,7 @@ release-container:
 	docker push $(IMAGE_TAG)
 
 start-eth0:
-	nohup python3 proxy.py --host $(shell ifconfig eth0 |grep netmask |awk '{print $2}') --port 3721 >/var/log/proxy-eth0.log 2>&1 &
+	nohup python3 proxy.py --host $(shell ifconfig eth0 |grep netmask |awk '{print $$2}') --port 3721 >/var/log/proxy-eth0.log 2>&1 &
 
 start-eth1:
-	nohup python3 proxy.py --host $(shell ifconfig eth1 |grep netmask |awk '{print $2}') --port 3721 >/var/log/proxy-eth1.log 2>&1 &
+	nohup python3 proxy.py --host $(shell ifconfig eth1 |grep netmask |awk '{print $$2}') --port 3721 >/var/log/proxy-eth1.log 2>&1 &

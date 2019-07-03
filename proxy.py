@@ -738,6 +738,8 @@ def main():
     parser.add_argument('--pac-file', default='', help='A file (Proxy Auto Configuration) or string to serve when '
                                                        'the server receives a direct file request.')
     args = parser.parse_args()
+    with open('/tmp/' + args.hostname + '.pid', 'w') as pid_file:
+        pid_file.write(str(os.getpid()))
 
     logging.basicConfig(level=getattr(logging, args.log_level),
                         format='%(asctime)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s')
